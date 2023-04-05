@@ -1,10 +1,11 @@
-// no main
-#![no_main]
 #![no_std]
-use panic_halt;
+#![no_main]
+
+use panic_halt as _;
+use cortex_m::asm;
 use cortex_m_rt::entry;
 
-#![entry]
+#[entry]
 fn main() -> ! {
     loop {}
 }
