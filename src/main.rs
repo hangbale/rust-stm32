@@ -1,7 +1,7 @@
 #![deny(unsafe_code)]
 #![no_std]
 #![no_main]
-
+// S接PB12 -接负极即可
 use panic_halt as _;
 use nb::block;
 use cortex_m_rt::entry;
@@ -24,22 +24,18 @@ fn main() -> ! {
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
     // Acquire the GPIOC peripheral
-    // let mut gpioc = dp.GPIOC.split();
-    let mut gpioa = dp.GPIOA.split();
+    let mut gpiob = dp.GPIOB.split();
+    // pb12口 控制蜂鸣器
+    let mut buzzer = gpiob.pb12.into_push_pull_output(&mut gpiob.crh);
 
-    // Configure gpio C pin 13 as a push-pull output. The `crh` register is passed to the function
-    // in order to configure the port. For pins 0-7, crl should be passed instead.
-    let mut led = gpioa.pa1.into_push_pull_output(&mut gpioa.crl);
-    // let mut led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
     // Configure the syst timer to trigger an update every second
     let mut timer = Timer::syst(cp.SYST, &clocks).counter_hz();
-    timer.start(10.Hz()).unwrap();
-
-    // Wait for the timer to trigger an update and change the state of the LED
+    timer.start(5000.Hz()).unwrap();
+    buzzer.set_high();
     loop {
         block!(timer.wait()).unwrap();
-        led.set_high();
+        buzzer.set_high();
         block!(timer.wait()).unwrap();
-        led.set_low();
+        buzzer.set_low();
     }
 }
